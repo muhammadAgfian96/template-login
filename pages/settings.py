@@ -1,8 +1,8 @@
 import streamlit as st
-from streamlit import session_state as state
+# from streamlit import session_state as state
 
-def settings_page():
-    st.write('Halo')
+def settings_page(state):
+    st.write('Settings')
     # del state.username
-    st.write(list(state.keys()))
-    st.write(list(state.values()))
+    # st.write(list(state.keys()))
+    # st.write(list(state.values()))

@@ -1,8 +1,8 @@
 import streamlit as st
-from streamlit import session_state as state
+# from streamlit import session_state as state
 
-def home_page():
+def home_page(state):
 
-
-    st.write(list(state.keys()))
-    st.write(list(state.values()))
+    st.write('Home')
+    # st.write(list(state.keys()))
+    # st.write(list(state.values()))

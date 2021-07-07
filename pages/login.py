@@ -1,9 +1,10 @@
 import streamlit as st
-from streamlit import session_state as state
+# from streamlit import session_state as state
 import hashlib, binascii, os
 import time
 
-def submit_login():
+def submit_login(state):
+
     bar_progrress = st.progress(0)
     with st.spinner('Wait we check you...'):
         for i in range(0,101):
@@ -17,13 +18,15 @@ def submit_login():
     else:
         st.error('Failed Login!')
 
-def login_page():
-    st.write('# Welcome Multispectral App')
+def login_page(state):
+    st.write('# Welcome Annotation App')
     with st.form('login'):
         state.username = st.text_input('Username')
         state.pwd = st.text_input('Password', type='password')
-        st.form_submit_button('Sign In', on_click=submit_login)
+        submit = st.form_submit_button('Sign In')
     st.write('Halo')
+    if submit:
+        submit_login(state)
     # if submit:
     #     try:
     #         data = get_user_by_name(name)
