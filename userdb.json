@@ -1,0 +1,14 @@
+{
+  "users": {
+    "admin": {
+      "pwd": "82c93ad4f519d439f4350993908713907c9097024add600638833ce2e41e33a26ad9d54b199f66709263a39c928e4b3fcadd583102dcc08c5a035764297eed9dcf8642e14e1fb4b023b965734a25ccfa1627f53b4726ab1ea02aa71602137f1c",
+      "roles": "grader",
+      "status": true
+    },
+    "syinx": {
+      "pwd": "95ca77dee30e5360295e1d1b2c00c47580688c1aa5bd54eb3d4cd33cabd74ace9e1e45ffc88b6d61b404ec6ff6301e045a30f2ec8b52a7b75c37392816f3a1340886049dadef54fd7f1dbf8e2a855e56572769bcb942ccb7aaa8774685acfe94",
+      "roles": "superuser",
+      "status": true
+    }
+  }
+}

@@ -1,15 +1,15 @@
 import streamlit as st
-
-# from streamlit import session_state as state
 from state_management import *
 
 from streamlit.report_thread import get_report_ctx
 from streamlit.server.server import Server
 from streamlit.hashing import _CodeHasher
 
-from pages.login import login_page
+from pages.login import *
 from pages.home import home_page
 from pages.settings import settings_page
+from pages.register import div_register
+
 
 def sidebar(pages):
     st.sidebar.write('## Navigation')
@@ -21,32 +21,44 @@ def logout(state):
     state.clear()
 
 def main():
-    st.set_page_config(page_title='template login', page_icon='🦈', layout='wide', initial_sidebar_state='expanded')
+    st.set_page_config(page_title='Template login', page_icon='🎈', layout='wide', initial_sidebar_state='expanded')
     state = _get_state()
     default_value_state(state)
-    # if state.login_status is None:
-    #     state.login_status = False
-
 
     if state.login_status == True:
         col = st.beta_columns((1,1,1,1,1,1))
+        # state.user.name
+        # state.user.role
+        # state.user.status
+
         if col[-1].button('Logout'):
             state.login_status = False
             state.clear()
         
-        col[-1].write(f'Hi, **{state.username}**')
+        col[-1].write(f'Hi, **{state.user.name}**')
+        col[-1].write(f'Status: **{"Active" if state.user.status else "Non Active"}**')
 
-
+        if state.user.status == False:
+            st.error('# Sorry, Check your status!')
+            return
+            
+        # here your template to apply
         pages = {
             'Home': home_page,
             'Settings': settings_page
         }
 
+        if state.user.role == 'superuser':
+            pages['Register User'] = div_register
+
         # render page
         pages[sidebar(pages)](state)
     else:
         login_page(state)
-    
+        # div_register(state, roles=['grader', 'admin', 'superuser'])
+
+
+
     st.write('End Page')
     state.sync()
 # -------------- FOR STATE MANAGEMENT -----------------

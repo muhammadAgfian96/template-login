@@ -1,56 +1,37 @@
 import streamlit as st
-# from streamlit import session_state as state
 import hashlib, binascii, os
 import time
+import json
+from easydict import EasyDict as edict
+from pages.register import is_this_exist, verify_string
 
 def submit_login(state):
-
     bar_progrress = st.progress(0)
-    with st.spinner('Wait we check you...'):
-        for i in range(0,101):
-            bar_progrress.progress(i)
-            time.sleep(0.005)
-    
-    if state.username != '' and state.pwd != '':
-        state.login_status = True
-        st.success('Succes Login!')
-        st.balloons()
+    data = is_this_exist(state.username)
+    if len(data) <=0:
+        st.error('Incorrect Username/Password')
+        time.sleep(1)
+        return
+    password_provided = data.get("pwd_hash")
+    isMatchPass = verify_string(password_provided,  state.pwd)
+    if not isMatchPass:
+        st.error('Incorrect Username/Password')
+        time.sleep(1)
     else:
-        st.error('Failed Login!')
+        state.user = edict()
+        state.user.name = state.username
+        state.user.role = data.get('roles')
+        state.user.status = data.get('status')
+        state.login_status = isMatchPass
 
 def login_page(state):
     st.write('# Welcome Annotation App')
+
     with st.form('login'):
+        st.write('### Login')
         state.username = st.text_input('Username')
         state.pwd = st.text_input('Password', type='password')
         submit = st.form_submit_button('Sign In')
-    st.write('Halo')
+
     if submit:
         submit_login(state)
-    # if submit:
-    #     try:
-    #         data = get_user_by_name(name)
-    #         password_provided = data.get("pwd")
-    #         isMatchPass = verify_password(password_provided, pwd)
-    #         if not isMatchPass:
-    #             st.error('Incorrect Username/Password')
-    #             time.sleep(1)
-    #         else:
-    #             state.user = edict()
-    #             state.user.name = name
-    #             state.user.role = data.get('role')
-    #             state.user.status = data.get('status')
-    #         return isMatchPass
-    #         # return state.login_status if state.login_status else False
-
-    #     except TypeError:
-    #         st.error('Incorrect Username/Password')
-
-# ============================= utils ============================
-def hash_password(password):
-    """Hash a password for storing."""
-    salt = hashlib.sha256(os.urandom(60)).hexdigest().encode('ascii')
-    pwdhash = hashlib.pbkdf2_hmac('sha512', password.encode('utf-8'),
-                                salt, 100000)
-    pwdhash = binascii.hexlify(pwdhash)
-    return (salt + pwdhash).decode('ascii')
