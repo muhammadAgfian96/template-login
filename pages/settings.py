@@ -3,5 +3,6 @@ from streamlit import session_state as state
 
 def settings_page():
     st.write('Halo')
-    del state.username
+    # del state.username
     st.write(list(state.keys()))
+    st.write(list(state.values()))

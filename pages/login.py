@@ -6,7 +6,7 @@ import time
 def submit_login():
     bar_progrress = st.progress(0)
     with st.spinner('Wait we check you...'):
-        for i in range(0,100):
+        for i in range(0,101):
             bar_progrress.progress(i)
             time.sleep(0.005)
     
@@ -20,8 +20,8 @@ def submit_login():
 def login_page():
     st.write('# Welcome Multispectral App')
     with st.form('login'):
-        st.text_input('Username', key='username')
-        st.text_input('Password', type='password', key='pwd')
+        state.username = st.text_input('Username')
+        state.pwd = st.text_input('Password', type='password')
         st.form_submit_button('Sign In', on_click=submit_login)
     st.write('Halo')
     # if submit:
