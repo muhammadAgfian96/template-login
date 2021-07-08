@@ -4,7 +4,7 @@ import os
 from db_handler import Database_Puller as db
 from bson.objectid import ObjectId
 import numpy as np
-
+from PIL import Image
 
 
 db_handler = db()
@@ -66,9 +66,9 @@ def home_page(state):
     # display img
     if state.img_display is not None:
         st.sidebar.write('**Dimention**')
-        st.sidebar.write('height :', state.img_display.shape[0])
-        st.sidebar.write('width  :', state.img_display.shape[1])
-        st.sidebar.write('channel:', state.img_display.shape[2])
+        st.sidebar.write('height :', state.img_display.size[1])
+        st.sidebar.write('width  :', state.img_display.size[0])
+        # st.sidebar.write('channel:', state.img_display.shape[2])
         col_img.image(state.img_display, channels="BGR")
     else:
         col_img.warning('Cant Read the Image or No Data!')
@@ -223,36 +223,6 @@ def load_images():
     return ls_imgs
 
 
-def condition_image(img_path, background_img='black', **kwargs):
-    """ Conditions the image before being processed 
-    
-    reff:
-        https://stackoverflow.com/questions/3803888/how-to-load-png-images-with-4-channels
-    """
-    # read 4 ch img
-    image_4channel = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
-    alpha_channel = image_4channel[:,:,3]
-    rgb_channels = image_4channel[:,:,:3]
-
-    # set Background Image
-    if background_img == 'mean':
-        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * np.mean(rgb_channels)
-    elif background_img == 'white':
-        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * 255
-    elif background_img == 'black':
-        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * 0
-
-    # Alpha factor
-    alpha_factor = alpha_channel[:,:,np.newaxis].astype(np.float32) / 255.0
-    alpha_factor = np.concatenate((alpha_factor, alpha_factor ,alpha_factor), axis=2)
-    
-    # Transparent Image Rendered on Background
-    base = rgb_channels.astype(np.float32) * alpha_factor
-    background = background_image.astype(np.float32) * (1 - alpha_factor)
-    final_image = base + background
-    
-    # return 512,512,3 and the background is mean of rgb
-    # h, w, c = self.params.input_shape
-    # final_image = cv2.resize(final_image, (h, w))
-    # final_image = final_image* 1.0/255.0
-    return final_image
+def condition_image(img_path):
+    image = Image.open(img_path)
+    return image
