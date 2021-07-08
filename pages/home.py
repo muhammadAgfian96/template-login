@@ -3,6 +3,7 @@ import cv2
 import os
 from db_handler import Database_Puller as db
 from bson.objectid import ObjectId
+import numpy as np
 
 
 
@@ -31,7 +32,9 @@ def home_page(state):
         else:
             status_search.success('Found!')
             state.data = result
-        
+            state.img_file = os.path.join(state.data['img_dir'], state.data['img_filename'])
+            # state.img_display = cv2.imread(state.img_file)
+            state.img_display = condition_image(state.img_file)
     
     # find
     id_container = col2.empty()
@@ -71,6 +74,7 @@ def home_page(state):
         col_img.warning('Cant Read the Image or No Data!')
     if col_history.button('Clear History'):
         state.history = {}
+
     col_history.write('**History:**')
     col_history.write(state.history)
 
@@ -130,16 +134,16 @@ def label_this(state):
     if col[2].button('🌴  Normal'):
         updated_data = db_handler.update_rat_damage_value(
             id_=state.data['_id'],
-            value='Normal')
+            value='No')
 
         if updated_data['found'] == False:
             status.error('Not found files!')
         if updated_data['found'] and updated_data['updated_ratdamage'] and updated_data['updated_tags']:
-            status.success('Updated: 🌴 Normal')   
-            state.history[str(state.data['_id'])] = 'Normal'
+            status.success('Updated: 🌴 No')   
+            state.history[str(state.data['_id'])] = 'No'
             get_one_random_data(state)
         elif updated_data['updated_ratdamage'] == False and updated_data['found']:
-            state.history[str(state.data['_id'])] = 'Normal'
+            state.history[str(state.data['_id'])] = 'No'
             status.warning('No Update data!')
             get_one_random_data(state)
         else:
@@ -166,6 +170,9 @@ def slide_history(state):
         else:
             state.curr_dir -= 1
             state.data = db_handler.get_data_by_id(list_file_id[state.curr_dir])
+            state.img_file = os.path.join(state.data['img_dir'], state.data['img_filename'])
+            # state.img_display = cv2.imread(state.img_file)
+            state.img_display = condition_image(state.img_file)
 
 
     if col[1].button('Next'):
@@ -176,6 +183,9 @@ def slide_history(state):
         else:
             state.curr_dir += 1
             state.data = db_handler.get_data_by_id(list_file_id[state.curr_dir])
+            state.img_file = os.path.join(state.data['img_dir'], state.data['img_filename'])
+            # state.img_display = cv2.imread(state.img_file)
+            state.img_display = condition_image(state.img_file)
     
     hr(st.sidebar)
     st.sidebar.info('*Path Image*')
@@ -200,7 +210,9 @@ def get_one_random_data(state):
     """
     state.data = db_handler.get_one_data()
     state.img_file = os.path.join(state.data['img_dir'], state.data['img_filename'])
-    state.img_display = cv2.imread(state.img_file)
+    # state.img_display = cv2.imread(state.img_file)
+    state.img_display = condition_image(state.img_file)
+
 
 @st.cache()
 def load_images():
@@ -209,3 +221,38 @@ def load_images():
     curr_dir = os.getcwd()
     ls_imgs = [os.path.join(curr_dir, path, img) for img in images]
     return ls_imgs
+
+
+def condition_image(img_path, background_img='black', **kwargs):
+    """ Conditions the image before being processed 
+    
+    reff:
+        https://stackoverflow.com/questions/3803888/how-to-load-png-images-with-4-channels
+    """
+    # read 4 ch img
+    image_4channel = cv2.imread(img_path, cv2.IMREAD_UNCHANGED)
+    alpha_channel = image_4channel[:,:,3]
+    rgb_channels = image_4channel[:,:,:3]
+
+    # set Background Image
+    if background_img == 'mean':
+        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * np.mean(rgb_channels)
+    elif background_img == 'white':
+        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * 255
+    elif background_img == 'black':
+        background_image = np.ones_like(rgb_channels, dtype=np.uint8) * 0
+
+    # Alpha factor
+    alpha_factor = alpha_channel[:,:,np.newaxis].astype(np.float32) / 255.0
+    alpha_factor = np.concatenate((alpha_factor, alpha_factor ,alpha_factor), axis=2)
+    
+    # Transparent Image Rendered on Background
+    base = rgb_channels.astype(np.float32) * alpha_factor
+    background = background_image.astype(np.float32) * (1 - alpha_factor)
+    final_image = base + background
+    
+    # return 512,512,3 and the background is mean of rgb
+    # h, w, c = self.params.input_shape
+    # final_image = cv2.resize(final_image, (h, w))
+    # final_image = final_image* 1.0/255.0
+    return final_image
