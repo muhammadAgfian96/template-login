@@ -21,7 +21,7 @@ def logout(state):
     state.clear()
 
 def main():
-    st.set_page_config(page_title='Template login', page_icon='🎈', layout='wide', initial_sidebar_state='expanded')
+    st.set_page_config(page_title='Rat Damage', page_icon='🌴', layout='wide', initial_sidebar_state='expanded')
     state = _get_state()
     default_value_state(state)
 

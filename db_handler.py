@@ -346,8 +346,8 @@ class Database_Puller:
         """
         # result = self.ffb_coll.find_one({"tags": {"$ne": 'ratdamage_updated'}})
         result = self.ffb_coll.aggregate([
-                    # { "$match": { "tags": { "$ne": ['ratdamage_updated'] } } },
-                    { "$match": { "tags": { "$in": ['ratdamage_updated'] } } },
+                    { "$match": { "tags": { "$ne": ['ratdamage_updated'] } } },
+                    # { "$match": { "tags": { "$in": ['ratdamage_updated'] } } },
                     { "$sample": { "size": 1 } }
                 ])
         for doc in result:
